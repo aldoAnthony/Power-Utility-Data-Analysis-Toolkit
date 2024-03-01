@@ -19,7 +19,16 @@ Developed functions encompass statistical analysis, date parsing, hashtag and mu
 
 - <b>Visual Studio Code</b> 
 
-<h2>Project walk-through:</h2>
+<h2>Project Workflow:</h2>
+
+-	Implemented functions to calculate numerical metrics such as mean, median, maximum, minimum, standard deviation, and variance from power utility data.
+-	Constructed a versatile function to generate a 5-number summary, aiding in comprehensive data understanding.
+-	Developed a date parser function to standardize date formats for efficient data processing.
+-	Engineered a hashtag and municipality extractor function to enhance data categorization and analysis.
+-	Designed a function to determine the number of tweets per day, facilitating temporal analysis.
+-	Created a word splitter function to break down sentences into individual words for textual analysis.
+-	Developed a stop word remover function to refine textual data by eliminating common stopwords.
+
 
 
 
