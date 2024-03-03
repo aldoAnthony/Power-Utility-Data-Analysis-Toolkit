@@ -1,4 +1,4 @@
-<h1>Power Utility Data Analysis Toolkit</h1>
+<h1>Power Utility Data Analysis Toolkit Project</h1>
 
  ### [Demonstration](https://youtu.be/7eJexJVCqJo)
 
