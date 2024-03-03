@@ -1,7 +1,5 @@
 <h1>Power Utility Data Analysis Toolkit Project</h1>
 
- ### [Demonstration](https://youtu.be/7eJexJVCqJo)
-
 <h2>Description</h2>
 The project involves the creation of Python functions tailored for numerical metric computation and textual data processing on two CSV files. One file contains data of electrification per province in South Africa between financial years, while the other contains extracted tweets. 
 
