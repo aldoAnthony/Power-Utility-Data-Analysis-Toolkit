@@ -3,48 +3,13 @@ import numpy as np
 
 """ ### Data Loading and Preprocessing ### """
 
-# Electricification by province (EBP) data
-#ebp_url = 'https://raw.githubusercontent.com/Explore-AI/Public-Data/master/Data/electrification_by_province.csv'
-ebp_path = '~/Python_Programs/Explorer_Academy_Course_Work/Predicts/electrification_by_province.csv'
-ebp_df = pd.read_csv(ebp_path)
-#ebp_df = pd.read_csv(ebp_url)
-
-# ~/Python_Programs/Explorer_Academy_Course_Work/Predicts
-for col, row in ebp_df.iloc[:,1:].items():
-    ebp_df[col] = ebp_df[col].str.replace(',','').astype(int)
-
-#print(ebp_df.head())
-ebp_df.head()
-
 # Twitter data
-#twitter_url = 'https://raw.githubusercontent.com/Explore-AI/Public-Data/master/Data/twitter_nov_2019.csv'
-twitter_path = '~/Python_Programs/Explorer_Academy_Course_Work/Predicts/twitter_nov_2019.csv'
+twitter_path = 'python\data\\twitter_nov_2019.csv'
 twitter_df = pd.read_csv(twitter_path)
-#print(twitter_df.head())
-twitter_df.head()
 
-
-""" ### Important Variables ### """
-# gauteng ebp data as a list
-gauteng = ebp_df['Gauteng'].astype(float).to_list()
-
-# dates for twitter tweets
-dates = twitter_df['Date'].to_list()
-
-# dictionary mapping official municipality twitter handles to the municipality name
-mun_dict = {
-    '@CityofCTAlerts' : 'Cape Town',
-    '@CityPowerJhb' : 'Johannesburg',
-    '@eThekwiniM' : 'eThekwini' ,
-    '@EMMInfo' : 'Ekurhuleni',
-    '@centlecutility' : 'Mangaung',
-    '@NMBmunicipality' : 'Nelson Mandela Bay',
-    '@CityTshwane' : 'Tshwane'
-}
-
-# dictionary of english stopwords
+# dictionary of English stopwords
 stop_words_dict = {
-    'stopwords':[
+    'stopwords': [
         'where', 'done', 'if', 'before', 'll', 'very', 'keep', 'something', 'nothing', 'thereupon', 
         'may', 'why', '’s', 'therefore', 'you', 'with', 'towards', 'make', 'really', 'few', 'former', 
         'during', 'mine', 'do', 'would', 'of', 'off', 'six', 'yourself', 'becoming', 'through', 
@@ -77,37 +42,36 @@ stop_words_dict = {
     ]
 }
 
-
 ### START FUNCTION
 def stop_words_remover(df):
+    
 
-    pd.set_option('display.max_columns', None) # Set to display all columns in output
+    """
+    Remove stopwords from the 'Tweets' column of the dataframe.
 
-    twt_lst = list(df['Tweets'].values) # Converts 'Tweet 'column into a numpy array then into a list
-    #print(twt_lst) # Observing output
+    Args:
+    df (DataFrame): Input dataframe with 'Tweets' column.
 
-    # Code takes a list of strings "twt_lst" and splits each string into a list of strings and assigns it to the variable twt_lst
-    twt_lst =  [twt_str.split() for twt_str in twt_lst] 
-    #print(twt_lst) # Observing output
+    Returns:
+    DataFrame: Modified dataframe with 'Without Stop Words' column added.
+    """
+    # Split each tweet into a list of words
+    tweet_words = df['Tweets'].str.split()
 
-    # Extracts the list of stopwords from my_dict and assigns it to the variable stopwords
-    stopwords = stop_words_dict['stopwords']
+    # Remove stopwords from each list of words
+    without_stopwords = tweet_words.apply(lambda words: [word.lower() for word in words if word.lower() not in stop_words_dict['stopwords']])
 
-    # Code iterates over every element of "twt_lst". Within this loop, the list comprehension is used
-    # to create a new list that contains only those words from the original list that are not in the stopwords list.
-    # The condition in the list comprehension checks whether the lowercase version of each word in the current string
-    # of twt_lst is not in the stopwords list. If it is, the word is excluded from the new list.
-    # The modified list is assigned back to twt_lst to update its contents.
-    for i in range(len(twt_lst)):
-        twt_lst[i] = [word.lower() for word in twt_lst[i] if word.lower() not in stopwords]
-    #print(twt_lst) # Observing output
+    # Assign the modified lists back to the dataframe
+    df['Without Stop Words'] = without_stopwords
 
+    return df
 
+### END FUNCTION
 
-    df["Without Stop Words"] = twt_lst # assign "twt_lst" as a column in the "df" dataframe named "Without Stop Words"
-
-    #print(df)
-    return print(df) # NB>>> Remove print()
-### END FUNCTION 
-
+# Input:
 stop_words_remover(twitter_df.copy())
+
+# Output:
+pd.set_option('display.max_columns', None)# set to display all columns in output
+output_data = stop_words_remover(twitter_df.copy())
+print(output_data)
