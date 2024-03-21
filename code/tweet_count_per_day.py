@@ -8,20 +8,37 @@ import numpy as np
 twitter_path = 'python\data\\twitter_nov_2019.csv'
 twitter_df = pd.read_csv(twitter_path)
 
+
 ### START FUNCTION
-def word_splitter(df):
-    pd.set_option('display.max_columns', None) # Set to display all columns in output
+def number_of_tweets_per_day(df):
+    """
+    Count the number of tweets per day.
 
-    twts_lst = list(df['Tweets'].values) # Converts 'Tweet 'column into a numpy array then into a list
-    #print(twts_lst)# Observing output
+    Args:
+    df (DataFrame): Twitter dataframe containing the 'Date' and 'Tweets' columns.
 
-    # Code takes a list of strings "twts_lst" and splits each string into a list of strings, storing all these new lists
-    # into a column in the "df" dataframe named "Split Tweets"
-    df["Split Tweets"] =  [[word.lower() for word in twt_str.split()] for twt_str in twts_lst]
+    Returns:
+    DataFrame: DataFrame with the number of tweets per day.
+    """
+    # Create a copy of the DataFrame with only the 'Date' and 'Tweets' columns
+    df2 = df[['Date', 'Tweets']].copy() 
+
+    # Convert the 'Date' column to a date format
+    df2['Date'] = pd.to_datetime(df2['Date']).dt.date 
+
+    # Group the tweets by date and count the number of tweets for each date
+    df2 = df2.groupby('Date').size().reset_index(name='Tweets')  
+
+    # Set the 'Date' column as the index of the DataFrame
+    df2 = df2.set_index('Date') 
     
-    #print(df["Split Tweets"]) # Observing output
-
-    return print(df) # NB>>> Remove print()
+    return df2
 ### END FUNCTION
 
-word_splitter(twitter_df.copy())
+# Input:
+number_of_tweets_per_day(twitter_df.copy())
+
+# Output:
+output_data = number_of_tweets_per_day(twitter_df.copy())
+print(output_data)
+
