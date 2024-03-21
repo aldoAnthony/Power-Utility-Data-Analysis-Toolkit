@@ -1,110 +1,55 @@
-import pandas as pd
 import numpy as np
-
-""" ### Data Loading and Preprocessing ### """
+import pandas as pd
 
 # Electricification by province (EBP) data
-#ebp_url = 'https://raw.githubusercontent.com/Explore-AI/Public-Data/master/Data/electrification_by_province.csv'
-ebp_path = '~/Python_Programs/Explorer_Academy_Course_Work/Predicts/electrification_by_province.csv'
+ebp_path = 'python\data\electrification_by_province.csv'
 ebp_df = pd.read_csv(ebp_path)
-#ebp_df = pd.read_csv(ebp_url)
 
-# ~/Python_Programs/Explorer_Academy_Course_Work/Predicts
+
+# Preprocessing: Remove commas and convert to integer
 for col, row in ebp_df.iloc[:,1:].items():
     ebp_df[col] = ebp_df[col].str.replace(',','').astype(int)
-
-#print(ebp_df.head())
-ebp_df.head()
-
-# Twitter data
-#twitter_url = 'https://raw.githubusercontent.com/Explore-AI/Public-Data/master/Data/twitter_nov_2019.csv'
-twitter_path = '~/Python_Programs/Explorer_Academy_Course_Work/Predicts/twitter_nov_2019.csv'
-twitter_df = pd.read_csv(twitter_path)
-#print(twitter_df.head())
-twitter_df.head()
 
 
 """ ### Important Variables ### """
 # gauteng ebp data as a list
 gauteng = ebp_df['Gauteng'].astype(float).to_list()
 
-# dates for twitter tweets
-dates = twitter_df['Date'].to_list()
+# Function to calculate the five-number summary of a dataset
+def five_num_summary(data):
+    """
+    Calculate the five-number summary (minimum, maximum, median, 1st quartile, and 3rd quartile) of a dataset.
 
-# dictionary mapping official municipality twitter handles to the municipality name
-mun_dict = {
-    '@CityofCTAlerts' : 'Cape Town',
-    '@CityPowerJhb' : 'Johannesburg',
-    '@eThekwiniM' : 'eThekwini' ,
-    '@EMMInfo' : 'Ekurhuleni',
-    '@centlecutility' : 'Mangaung',
-    '@NMBmunicipality' : 'Nelson Mandela Bay',
-    '@CityTshwane' : 'Tshwane'
-}
+    Args:
+    data (list or array-like): The dataset for which to calculate the summary.
 
-# dictionary of english stopwords
-stop_words_dict = {
-    'stopwords':[
-        'where', 'done', 'if', 'before', 'll', 'very', 'keep', 'something', 'nothing', 'thereupon', 
-        'may', 'why', '’s', 'therefore', 'you', 'with', 'towards', 'make', 'really', 'few', 'former', 
-        'during', 'mine', 'do', 'would', 'of', 'off', 'six', 'yourself', 'becoming', 'through', 
-        'seeming', 'hence', 'us', 'anywhere', 'regarding', 'whole', 'down', 'seem', 'whereas', 'to', 
-        'their', 'various', 'thereafter', '‘d', 'above', 'put', 'sometime', 'moreover', 'whoever', 'although', 
-        'at', 'four', 'each', 'among', 'whatever', 'any', 'anyhow', 'herein', 'become', 'last', 'between', 'still', 
-        'was', 'almost', 'twelve', 'used', 'who', 'go', 'not', 'enough', 'well', '’ve', 'might', 'see', 'whose', 
-        'everywhere', 'yourselves', 'across', 'myself', 'further', 'did', 'then', 'is', 'except', 'up', 'take', 
-        'became', 'however', 'many', 'thence', 'onto', '‘m', 'my', 'own', 'must', 'wherein', 'elsewhere', 'behind', 
-        'becomes', 'alone', 'due', 'being', 'neither', 'a', 'over', 'beside', 'fifteen', 'meanwhile', 'upon', 'next', 
-        'forty', 'what', 'less', 'and', 'please', 'toward', 'about', 'below', 'hereafter', 'whether', 'yet', 'nor', 
-        'against', 'whereupon', 'top', 'first', 'three', 'show', 'per', 'five', 'two', 'ourselves', 'whenever', 
-        'get', 'thereby', 'noone', 'had', 'now', 'everyone', 'everything', 'nowhere', 'ca', 'though', 'least', 
-        'so', 'both', 'otherwise', 'whereby', 'unless', 'somewhere', 'give', 'formerly', '’d', 'under', 
-        'while', 'empty', 'doing', 'besides', 'thus', 'this', 'anyone', 'its', 'after', 'bottom', 'call', 
-        'n’t', 'name', 'even', 'eleven', 'by', 'from', 'when', 'or', 'anyway', 'how', 'the', 'all', 
-        'much', 'another', 'since', 'hundred', 'serious', '‘ve', 'ever', 'out', 'full', 'themselves', 
-        'been', 'in', "'d", 'wherever', 'part', 'someone', 'therein', 'can', 'seemed', 'hereby', 'others', 
-        "'s", "'re", 'most', 'one', "n't", 'into', 'some', 'will', 'these', 'twenty', 'here', 'as', 'nobody', 
-        'also', 'along', 'than', 'anything', 'he', 'there', 'does', 'we', '’ll', 'latterly', 'are', 'ten', 
-        'hers', 'should', 'they', '‘s', 'either', 'am', 'be', 'perhaps', '’re', 'only', 'namely', 'sixty', 
-        'made', "'m", 'always', 'those', 'have', 'again', 'her', 'once', 'ours', 'herself', 'else', 'has', 'nine', 
-        'more', 'sometimes', 'your', 'yours', 'that', 'around', 'his', 'indeed', 'mostly', 'cannot', '‘ll', 'too', 
-        'seems', '’m', 'himself', 'latter', 'whither', 'amount', 'other', 'nevertheless', 'whom', 'for', 'somehow', 
-        'beforehand', 'just', 'an', 'beyond', 'amongst', 'none', "'ve", 'say', 'via', 'but', 'often', 're', 'our', 
-        'because', 'rather', 'using', 'without', 'throughout', 'on', 'she', 'never', 'eight', 'no', 'hereupon', 
-        'them', 'whereafter', 'quite', 'which', 'move', 'thru', 'until', 'afterwards', 'fifty', 'i', 'itself', 'n‘t',
-        'him', 'could', 'front', 'within', '‘re', 'back', 'such', 'already', 'several', 'side', 'whence', 'me', 
-        'same', 'were', 'it', 'every', 'third', 'together'
-    ]
-}
+    Returns:
+    dict: A dictionary containing the five-number summary statistics.
+    """
+    # Calculate the maximum, median, minimum, 1st quartile, and 3rd quartile
+    _max = np.max(data)
+    median = np.median(data)
+    _min = np.min(data)
+    q1 = np.percentile(data, 25)
+    q3 = np.percentile(data, 75)
 
-
-### START FUNCTION
-def five_num_summary(items):
-    _max = np.max(items)    
-    median = np.median(items)
-    _min = np.min(items)
-    q1 = np.percentile(items, 25)
-    q3 = np.percentile(items, 75)
-
-    # Create a dictionary with the variable names and their corresponding values
-    stats_dict = {
-        "Maximum": _max ,
+    # Create a dictionary with the summary statistics
+    summary_stats = {
+        "Maximum": _max,
         "Median": median,
         "Minimum": _min,
-        "q1": q1,
-        "q3": q3
-        }
+        "1st Quartile": q1,
+        "3rd Quartile": q3
+    }
 
     # Round all the values in the dictionary to 2 decimal places
-    rnded_stats_dict = {key: round(value, 2) for key, value in stats_dict.items()}
-    # Or longer version
-    # rounded_stats_dict = {}
-    # for key, value in stats_dict.items():
-    #     rounded_value = round(value, 2)
-    #     rounded_stats_dict[key] = rounded_value
+    rounded_summary_stats = {key: round(value, 2) for key, value in summary_stats.items()}
 
+    return rounded_summary_stats
 
-    return print(rnded_stats_dict) # NB>>> Remove print()
-### END FUNCTION
-
+# Input:
 five_num_summary(gauteng)
+
+# Output:
+output_data = five_num_summary(gauteng)
+print(output_data)
